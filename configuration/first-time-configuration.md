@@ -15,11 +15,11 @@ server.  You will need to log in with an administrative user.
 
 Open the administrative section of ChemLocator in the top navigation bar:
 
-![Admin menu](../../images/menu/admin-menu.png)
+![Admin menu](../images/menu/admin-menu.png)
 
 From the left-side navigation menu, open the Free Text Settings screen:
 
-![Free text settings ](../../images/configuration/elasticsearch-settings.png)
+![Free text settings ](../images/configuration/elasticsearch-settings.png)
 
 Next, configure Elasticsearch as follows:
 
