@@ -2,7 +2,7 @@
 
 Welcome to the documentation of ChemLocator!
 
-    This documentation is valid for version 3.2.0.7 of ChemLocator.
+    This documentation is valid for version 3.2.0 LTS of ChemLocator.
 
 Please use the navigation menu, or the following high-level outline to find the
 content information you are looking for:
