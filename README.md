@@ -1,6 +1,6 @@
 
 
-!!! important "Welcome to the documentation of ChemLocator!"
+Welcome to the documentation of ChemLocator!
 
     This documentation is valid for version 3.2.0.7 of ChemLocator.
 
