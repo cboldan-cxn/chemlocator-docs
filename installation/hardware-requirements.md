@@ -1,4 +1,4 @@
-# Hardware summary
+# Executive summary
 
 A ChemLocator installation involves several Docker containers.  Depending on 
 your performance requirements and available resources, you may choose to run all

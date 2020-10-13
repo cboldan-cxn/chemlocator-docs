@@ -7,7 +7,7 @@ provider, this guide can be skipped.
 
 In order for ChemLocator to be able to use Azure Active Directory you will need an account that is allowed to register applications with Azure.
 
-###### Application registration
+### Application registration
 
 To register ChemLocator with Azure you will need to login into [Azure Portal](https://portal.azure.com/) and navigate to Azure Active Directory -> App registrations and click _New registration_.
 
@@ -59,7 +59,22 @@ To register ChemLocator with Azure you will need to login into [Azure Portal](ht
     
     **The certificate are not provided by ChemLocator and you will need to provide valid or self-signed certificates**.
 
-###### Permissions configuration
+### Certificate creation for Azure App Registration
+
+For communicating with SharePoint Online and other Office 365 apps we will need to create a self-signed certificate and upload it to _Cetificates & secrets_ page.
+
+To create a certificate using PowerShell you can follow this MSDN guide: https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal#option-1-upload-a-certificate
+
+To create a certificate using Linux command line follow these steps:
+
+* Create a self signed certificate by running this command in a terminal: _openssl req -x509 -sha256 -nodes -days 1825 -newkey rsa:2048 -keyout cl-azure-privateKey.key -out cl-azure-selfsigncert.crt_
+    * Provide the requested information
+* Export the certificate by running the following command: _openssl pkcs12 -export -out cl-azure-selfsigncert.pfx -inkey cl-azure-privateKey.key -in cl-azure-selfsigncert.crt_
+    * Provide a password for the certificate
+    * Copy this file to the folder where azuread.env is located
+* Upload the crt file to _Cetificates & secrets_ page
+
+### Permissions configuration
 
 ChemLocator requires a specific set of permissions to be able to access you cloud data. With the permissions set below ChemLocator will be able to index (if content sources are set up) SharePoint Online libraries and OneDrive documents.
 
@@ -68,15 +83,15 @@ ChemLocator requires a specific set of permissions to be able to access you clou
 !!! attention
     Some permissions are duplicated because they are delegate or application permissions. Make sure the permissions match the image above.
 
-###### Configuring docker-compose.yml and azure.env
+### Configuring docker-compose.yml and azuread.env
 
 In this section we will configure ChemLocator to use Azure as the authentication provider and we will be setting up the connection details for Azure.
 
-Open docker-compose.yml with you favorite editor and change `"CL_CONFIG_AUTHENTICATIONTYPE=ldap"` to `"CL_CONFIG_AUTHENTICATIONTYPE=AzureAd"` and if `env_file` section does not exist add it and add `- azure.env` on the next line.
+Open docker-compose.yml with you favorite editor and change `"CL_CONFIG_AUTHENTICATIONTYPE=ldap"` to `"CL_CONFIG_AUTHENTICATIONTYPE=AzureAd"` and if `env_file` section does not exist add it and add `- azuread.env` on the next line.
 
-Next we will be creating `azure.env` file (if it exists we will just edit it) and make sure the file has the following contents:
+Next we will be creating `azuread.env` file (if it exists we will just edit it) and make sure the file has the following contents:
 
-    azure.env
+    azuread.env
         
         CL_CONFIG_AZUREAD__AUTHORIZATIONENDPOINT=https://login.microsoftonline.com/{tenant id}/oauth2/v2.0/authorize
         CL_CONFIG_AZUREAD__INSTANCE=https://login.microsoftonline.com/
@@ -88,6 +103,8 @@ Next we will be creating `azure.env` file (if it exists we will just edit it) an
         #Set the initial ChemLocator administrator account (This can be removed once a new administrator is assigned)
         #e.g. cl-administrator@contoso.com
         CL_CONFIG_AZUREAD__ADMINACCOUNT={ChemLocator administrator account}
+        #The password provided in Certificate creation for Azure App Registration section
+        CL_CONFIG_AZUREAD__CERTIFICATEPASSWORD=
         CL_CONFIG_AZUREAD__ROLESTOGROUPSMAP__CHEMLOCATORUSER__0={first group id}
         #CL_CONFIG_AZUREAD__ROLESTOGROUPSMAP__CHEMLOCATORUSER__1={second group id}
         CL_CONFIG_AZUREAD__ROLESTOGROUPSMAP__CHEMLOCATORADMIN__0={first admin group id}
@@ -106,3 +123,11 @@ Next we will be creating `azure.env` file (if it exists we will just edit it) an
 - Replace `{first admin group id}` with the identifier of an Azure group that will contain users that will have administrative permission in ChemLocator. These users will also have to be members of a group specified at the previous point. Also, here you can specify multiple groups that will be granted administrative rights in ChemLocator by following the steps at the previous point, but using `CL_CONFIG_AZUREAD__ROLESTOGROUPSMAP__CHEMLOCATORADMIN__{N}` variable instead
 
     ![App registration](../../images/configuration/azure-groups.png)
+
+Uncomment the following lines in _docker-compose.yml_
+
+    docker-compose.yml
+
+        #- "CL_CONFIG_AZUREAD__UA=NONISV|ChemAxon|${CL_CONFIG_AZUREAD__TENANTID}/${CL_VERSION}"
+
+        #- ${CL_PATH}/cl-azure-selfsigncert.pfx:/app/azure.pfx
